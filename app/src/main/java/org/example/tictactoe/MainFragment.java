@@ -1,5 +1,6 @@
 package org.example.tictactoe;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -29,6 +30,24 @@ public class MainFragment extends Fragment {
                         .setCancelable(false)
                         .setPositiveButton(R.string.ok_label, null)
                         .show();
+            }
+        });
+
+        View newButton = rootView.findViewById(R.id.new_button);
+        View continueButton = rootView.findViewById(R.id.continue_button);
+        newButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), GameActivity.class);
+                getActivity().startActivity(intent);
+            }
+        });
+        continueButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), GameActivity.class);
+                intent.putExtra(GameActivity.KEY_RESTORE, true);
+                getActivity().startActivity(intent);
             }
         });
 
