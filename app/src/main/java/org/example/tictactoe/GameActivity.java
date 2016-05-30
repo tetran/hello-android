@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 
 /**
  * Created by kaneshige.koichi on 2016/05/27.
@@ -65,4 +66,15 @@ public class GameActivity extends AppCompatActivity {
 
         mGameFragment.initGame();
     }
+
+    public void startThinking() {
+        View thinkView = findViewById(R.id.thinking);
+        thinkView.setVisibility(View.VISIBLE);
+    }
+
+    public void stopThinking() {
+        View thinkView = findViewById(R.id.thinking);
+        thinkView.setVisibility(View.GONE);
+    }
+
 }

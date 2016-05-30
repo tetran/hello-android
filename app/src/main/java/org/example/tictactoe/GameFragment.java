@@ -1,6 +1,7 @@
 package org.example.tictactoe;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -41,6 +42,8 @@ public class GameFragment extends Fragment {
 
     private int mLastLarge;
     private int mLastSmall;
+
+    private Handler mHandler = new Handler();
 
 
     @Override
@@ -123,6 +126,7 @@ public class GameFragment extends Fragment {
 
     private void initViews(View rootView) {
         mEntireBoard.setView(rootView);
+
         for (int large = 0; large < 9; large++) {
             View outer = rootView.findViewById(mLargeIds[large]);
             mLargeTiles[large].setView(outer);
@@ -138,7 +142,7 @@ public class GameFragment extends Fragment {
                     public void onClick(View v) {
                         if (isAvailable(smallTile)) {
                             makeMove(fLarge, fSmall);
-                            switchTurns();
+                            think();
                         }
                     }
                 });
@@ -146,18 +150,71 @@ public class GameFragment extends Fragment {
         }
     }
 
+    private void think() {
+        ((GameActivity) getActivity()).startThinking();
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (getActivity() == null) {
+                    return;
+                }
+                if (mEntireBoard.getOwner() == Tile.Owner.NEITHER) {
+                    int[] move = new int[2];
+                    pickMove(move);
+                    if (move[0] != -1 && move[1] != -1) {
+                        switchTurns();
+                        makeMove(move[0], move[1]);
+                        switchTurns();
+                    }
+                }
+                ((GameActivity) getActivity()).stopThinking();
+            }
+        }, 1000);
+    }
+
+    private void pickMove(int[] move) {
+        Tile.Owner opponent = mPlayer == Tile.Owner.X ? Tile.Owner.O : Tile.Owner.X;
+        int bestLarge = -1;
+        int bestSmall = -1;
+        int bestValue = Integer.MAX_VALUE;
+        for (int large = 0; large < 9; large++) {
+            for (int small = 0; small < 9; small++) {
+                Tile smallTile = mSmallTiles[large][small];
+                if (isAvailable(smallTile)) {
+                    // 指し手を試してスコアを計算する
+                    Tile newBoard = mEntireBoard.deepCopy();
+                    newBoard.getSubTiles()[large].getSubTiles()[small].setOwner(opponent);
+                    int value = newBoard.evaluate();
+                    Log.d("UT3",
+                            "Moving to " + large + ", " + small + " gives value " + value);
+                    if (value < bestValue) {
+                        bestLarge = large;
+                        bestSmall = small;
+                        bestValue = value;
+                    }
+                }
+            }
+        }
+        move[0] = bestLarge;
+        move[1] = bestSmall;
+        Log.d("UT3", "Best move is " + bestLarge + ", " + bestSmall);
+    }
+
     private void makeMove(int large, int small) {
         mLastLarge = large;
         mLastSmall = small;
+
         Tile smallTile = mSmallTiles[large][small];
         Tile largeTile = mLargeTiles[large];
         smallTile.setOwner(mPlayer);
         setAvailableFromLastMove(small);
+
         Tile.Owner oldWinner = largeTile.getOwner();
         Tile.Owner winner = largeTile.findWinner();
         if (winner != oldWinner) {
             largeTile.setOwner(winner);
         }
+
         winner = mEntireBoard.findWinner();
         mEntireBoard.setOwner(winner);
         updateAllTiles();
@@ -189,8 +246,9 @@ public class GameFragment extends Fragment {
         if (small != -1) {
             for (int dest = 0; dest < 9; dest++) {
                 Tile tile = mSmallTiles[small][dest];
-                if (tile.getOwner() == Tile.Owner.NEITHER)
+                if (tile.getOwner() == Tile.Owner.NEITHER) {
                     addAvailable(tile);
+                }
             }
         }
         // 有効なマス目がない場合には、空いているマス目をすべて有効にする
@@ -203,8 +261,9 @@ public class GameFragment extends Fragment {
         for (int large = 0; large < 9; large++) {
             for (int small = 0; small < 9; small++) {
                 Tile tile = mSmallTiles[large][small];
-                if (tile.getOwner() == Tile.Owner.NEITHER)
+                if (tile.getOwner() == Tile.Owner.NEITHER) {
                     addAvailable(tile);
+                }
             }
         }
     }
