@@ -15,7 +15,7 @@
         android:layout_height="match_parent"
         android:baselineAligned="false"
         android:gravity="center"
-        android:orientation="vertical">
+        android:orientation="horizontal">
 
         <fragment
             android:id="@+id/fragment_game"
