@@ -151,6 +151,7 @@ public class GameFragment extends Fragment {
                 inner.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        smallTile.animate();
                         if (isAvailable(smallTile)) {
                             mSoundPool.play(mSoundX, mVolume, mVolume, 1, 0, 1f);
                             makeMove(fLarge, fSmall);
@@ -227,6 +228,7 @@ public class GameFragment extends Fragment {
         Tile.Owner oldWinner = largeTile.getOwner();
         Tile.Owner winner = largeTile.findWinner();
         if (winner != oldWinner) {
+            largeTile.animate();
             largeTile.setOwner(winner);
         }
 
@@ -248,6 +250,7 @@ public class GameFragment extends Fragment {
     }
 
     private void addAvailable(Tile tile) {
+        tile.animate();
         mAvailable.add(tile);
     }
 
